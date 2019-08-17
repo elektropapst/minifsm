@@ -6,27 +6,30 @@
 void test_fsm() {
     using namespace minifsm;
 
-    State start     = TemplatedStateModel<1, false>::make();
-    State n_found   = TemplatedStateModel<2, false>::make();
-    State i_found   = TemplatedStateModel<3, false>::make();
-    State c_found   = TemplatedStateModel<4, false>::make();
-    State success   = TemplatedStateModel<7, true>::make();
+    State eat   = SimpleState<0>::make();
+    State sleep = FinalState<1>::make();
+    State work  = SimpleState<2>::make();
 
-
-    Symbol n = TemplatedSymbolModel<1>::make();
-    Symbol i = TemplatedSymbolModel<2>::make();
-    Symbol c = TemplatedSymbolModel<3>::make();
-    Symbol e = TemplatedSymbolModel<4>::make();
+    Symbol tired  = SimpleSymbol<0>::make();
+    Symbol hungry = SimpleSymbol<1>::make();
+    Symbol bored  = SimpleSymbol<2>::make();
 
     Delta delta = {
-            {start,   n, n_found},
-            {n_found, i, i_found},
-            {i_found, c, c_found},
-            {c_found, e, success}
+            {eat, tired,  sleep},
+            {eat, hungry, eat},
+            {eat, bored,  work},
+
+            {sleep, tired,  sleep},
+            {sleep, hungry, eat},
+            {sleep, bored,  work},
+
+            {work, tired,  sleep},
+            {work, hungry, eat},
+            {work, bored,  work}
     };
 
-    FSM fsm(start, delta);
-    auto result = fsm.accepts({n, i, c, e});
+    FSM stateMachine(sleep, delta);
+    stateMachine.transit({tired, hungry, bored, tired});
 
 }
 
